@@ -1,0 +1,33 @@
+{
+ "base_hero": "RAW photo, cinematic film still, photorealistic, handheld camera, 35mm film grain, a Japanese salaryman in his mid 30s, short black hair, silver metal-frame glasses, dark navy blue suit, white shirt, dark tie, black backpack",
+ "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Tokyo Japan",
+ "negative": "",
+ "clips": [
+  {"id": "f01", "hero": false, "seed": 101, "w": 512, "h": 640, "prompt": "Mount Fuji erupting, a massive grey ash column bursting from the side of the mountain, billowing volcanic plume rising, seen from far away, daytime, dramatic"},
+  {"id": "f02", "hero": true, "ip": "none", "seed": 102, "w": 512, "h": 640, "prompt": "seen from behind on a hilltop park in Tokyo, he turns around toward a distant mountain on the horizon with a rising dark plume, the city below, afternoon light"},
+  {"id": "f03", "hero": false, "seed": 103, "w": 512, "h": 640, "prompt": "a huge volcanic ash cloud rising high into the sky above a snow-capped mountain, towering eruption column, lightning inside the ash, wide view"},
+  {"id": "f04", "hero": true, "ip": "face", "ip_scale": 0.45, "seed": 104, "w": 512, "h": 640, "prompt": "close-up of his face, staring at the horizon in disbelief, afternoon light, wind in his hair"},
+  {"id": "f05", "hero": false, "seed": 105, "prompt": "Shinjuku skyscrapers under a dark brownish grey sky, volcanic ash haze, afternoon turning dark, street level looking up"},
+  {"id": "f06", "hero": true, "ip": "face", "ip_scale": 0.4, "seed": 106, "w": 512, "h": 640, "prompt": "looking up at the dark grey sky, fine ash falling around him, office district, afternoon gloom"},
+  {"id": "f07", "hero": true, "ip": "none", "seed": 107, "w": 512, "h": 640, "prompt": "close-up of an open palm held out, fine grey volcanic ash collecting on the hand, navy suit sleeve, shallow depth of field, gloomy light"},
+  {"id": "f08", "hero": false, "seed": 108, "prompt": "a commuter train stopped on an elevated railway track in light grey ash fall, overcast gloom, city, no people"},
+  {"id": "f09", "hero": false, "seed": 109, "prompt": "a metal rolling shutter closing at a Tokyo train station entrance, grey ash on the ground, gloomy light"},
+  {"id": "f10", "hero": false, "seed": 110, "prompt": "a crowd of office workers standing still outside a closed train station, looking at their phones, light ash falling, gloomy"},
+  {"id": "f11", "hero": false, "seed": 111, "prompt": "city road covered with a layer of grey volcanic ash, white lane markings barely visible, tire tracks, gloomy, ash falling"},
+  {"id": "f12", "hero": true, "ip": "face", "ip_scale": 0.35, "seed": 112, "w": 512, "h": 640, "prompt": "walking along an ash-covered sidewalk holding a handkerchief over his mouth and nose, ash falling, gloomy office district"},
+  {"id": "f13", "hero": false, "seed": 113, "prompt": "utility pole and power lines covered in grey volcanic ash, insulators dusted with ash, light rain, gloomy sky"},
+  {"id": "f14", "hero": false, "seed": 114, "prompt": "cars stuck on a road covered in thick grey volcanic ash, wheels spinning, ash falling, gloomy"},
+  {"id": "f15", "hero": true, "ip": "none", "seed": 115, "w": 512, "h": 640, "prompt": "seen from behind, walking away down an ash-covered street into grey haze, ash falling, office buildings"},
+  {"id": "f16", "hero": false, "seed": 116, "prompt": "Tokyo office district at night during a total blackout, every window dark, volcanic ash falling, faint moonlight, silhouettes of skyscrapers"},
+  {"id": "f17", "hero": true, "ip": "none", "seed": 117, "w": 512, "h": 640, "prompt": "walking through falling ash at night holding a smartphone flashlight, the beam full of ash particles, dark street, blackout"},
+  {"id": "f18", "hero": false, "seed": 118, "prompt": "a traditional Japanese wooden house at night with a thick layer of grey ash on the roof, sagging roof, dark, quiet"},
+  {"id": "f19", "hero": false, "seed": 119, "prompt": "a dark residential street at night covered in deep grey ash, no lights, ash falling quietly"},
+  {"id": "f20", "hero": false, "seed": 120, "prompt": "aerial view at dawn of a Japanese city blanketed in grey volcanic ash, roofs and roads all grey, haze"},
+  {"id": "f21", "hero": false, "seed": 121, "prompt": "excavators and dump trucks scooping grey volcanic ash from a city road, piles of ash, dawn"},
+  {"id": "f22", "hero": false, "seed": 122, "prompt": "huge piles of grey volcanic ash in a temporary storage yard, dump trucks, dawn haze"},
+  {"id": "f23", "hero": true, "ip": "none", "seed": 123, "w": 512, "h": 640, "prompt": "walking up the stairs of a pedestrian bridge covered with grey ash, seen from behind, dusk, ash on the railings"},
+  {"id": "f24", "hero": true, "ip": "none", "seed": 124, "w": 512, "h": 640, "prompt": "standing on an ash-covered pedestrian bridge over a quiet street, seen from behind, looking west at the evening sky, ash drifting"},
+  {"id": "f25", "hero": false, "seed": 125, "w": 512, "h": 640, "prompt": "a distant volcanic plume on the western horizon at dusk seen over city buildings, dim orange sky, ash haze"},
+  {"id": "f26", "hero": false, "seed": 126, "prompt": "Tokyo skyline at night, dark and silent, ominous low clouds"}
+ ]
+}

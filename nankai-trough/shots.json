@@ -17,9 +17,11 @@
    "scene": 1,
    "hero": true,
    "seed": 12,
-   "prompt": "stumbling sideways and looking back over his shoulder in shock, station plaza at dusk, people crouching, dust in the air",
+   "prompt": "looking back over his shoulder in shock, half turned, station plaza at dusk, people crouching in the background, dust in the air",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.45
   },
   {
    "id": "02a",
@@ -40,54 +42,63 @@
    "scene": 3,
    "hero": true,
    "seed": 31,
-   "prompt": "crouching down low on the sidewalk, covering his head with his arms, people crouching behind him, city street at dusk, dust",
+   "prompt": "crouching low on the pavement with both arms over his head, seen from the side, people crouching nearby, city street at dusk, dust",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "03b",
    "scene": 3,
    "hero": true,
    "seed": 32,
-   "prompt": "close-up of his face, eyes squeezed shut, bracing himself, dust falling around him, dusk light",
+   "prompt": "extreme close-up of his face, eyes squeezed shut, grimacing, bracing himself, dust falling, dusk light",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.5
   },
   {
    "id": "04a",
    "scene": 4,
    "hero": true,
    "seed": 41,
-   "prompt": "close-up, looking down at a glowing smartphone in his hand, face lit by the screen, worried expression, dusk street",
+   "prompt": "close-up from below, he stares at a glowing smartphone in his hand, the screen light on his face, worried, dusk",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.45
   },
   {
    "id": "04b",
    "scene": 4,
    "hero": true,
    "seed": 42,
-   "prompt": "turning his head to look back toward the sea at the end of the street, over-the-shoulder view, dusk, distant bay",
+   "prompt": "seen from behind, he turns his head toward the sea at the end of a sloping street, dusk, distant bay",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "05a",
    "scene": 5,
    "hero": true,
    "seed": 51,
-   "prompt": "running away from the camera up a steep narrow residential street, seen from behind, backpack bouncing, utility poles, dusk",
+   "prompt": "seen from behind, running hard up a steep narrow residential street, black backpack bouncing, utility poles, dusk",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "05b",
    "scene": 5,
    "hero": true,
    "seed": 52,
-   "prompt": "running toward the camera up a hill road, out of breath, other people running behind him, dusk, motion blur",
+   "prompt": "running toward the camera up a hill road, out of breath, people running behind him, dusk, motion blur",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.35
   },
   {
    "id": "06a",
@@ -101,9 +112,10 @@
    "scene": 6,
    "hero": true,
    "seed": 62,
-   "prompt": "standing on a hillside road looking back down at the sea, seen from behind, the port far below, dusk",
+   "prompt": "seen from behind on a hillside road, looking down at the sea and the port far below, dusk",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "06c",
@@ -117,9 +129,10 @@
    "scene": 7,
    "hero": true,
    "seed": 71,
-   "prompt": "walking slowly along a pitch dark street at night, holding a smartphone flashlight in front of him, power outage, no street lights",
+   "prompt": "walking along a pitch dark street at night holding up a smartphone flashlight, beam of light, power outage, no street lights",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "07b",
@@ -133,9 +146,10 @@
    "scene": 8,
    "hero": true,
    "seed": 81,
-   "prompt": "standing still on a dark hill road at night, seen from behind, looking at a distant orange glow over the city",
+   "prompt": "seen from behind, standing on a dark hill road at night, a distant orange glow over the city",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "08b",
@@ -163,9 +177,11 @@
    "scene": 9,
    "hero": true,
    "seed": 92,
-   "prompt": "sitting on a grey blanket on a gymnasium floor at night, tired, holding a bottle of water, dim flashlight light, evacuation shelter",
+   "prompt": "sitting on a grey blanket on a gymnasium floor at night, holding a water bottle, exhausted, dim flashlight light, evacuation shelter",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.45
   },
   {
    "id": "09c",
@@ -186,27 +202,32 @@
    "scene": 10,
    "hero": true,
    "seed": 102,
-   "prompt": "standing on a grassy hilltop at dawn, seen from behind, looking down at the city and the bay, wind",
+   "prompt": "seen from behind, standing on a grassy hilltop at dawn, looking down at the city and the bay, wind",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "none"
   },
   {
    "id": "10c",
    "scene": 10,
    "hero": true,
    "seed": 103,
-   "prompt": "side profile on a hilltop at dawn, looking down at the city, soft morning light on his face, wind in his hair",
+   "prompt": "side profile, standing on a hilltop at dawn, looking down at the city, soft morning light on his face, wind in his hair",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.45
   },
   {
    "id": "11a",
    "scene": 11,
    "hero": true,
    "seed": 111,
-   "prompt": "close-up side profile in warm morning light, looking into the distance, calm and serious, slight wind",
+   "prompt": "close-up side profile in warm morning light, looking into the distance, calm and serious",
    "w": 512,
-   "h": 640
+   "h": 640,
+   "ip": "face",
+   "ip_scale": 0.5
   },
   {
    "id": "11b",

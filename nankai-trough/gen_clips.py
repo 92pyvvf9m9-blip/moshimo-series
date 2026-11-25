@@ -19,6 +19,7 @@ ap.add_argument("shots"); ap.add_argument("out")
 ap.add_argument("--hero"); ap.add_argument("--only", choices=["hero", "env"])
 ap.add_argument("--ids"); ap.add_argument("--variant", type=int, default=0)
 ap.add_argument("--ip-scale", type=float, default=0.55)
+ap.add_argument("--ip-weight", default="ip-adapter-plus_sd15.safetensors")
 ap.add_argument("--w", type=int, default=448); ap.add_argument("--h", type=int, default=800)
 a = ap.parse_args()
 
@@ -40,7 +41,7 @@ pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config, times
 pipe.vae.enable_slicing()
 use_ip = any(c["hero"] for c in clips) and a.hero
 if use_ip:
-    pipe.load_ip_adapter("h94/IP-Adapter", subfolder="models", weight_name="ip-adapter-plus_sd15.safetensors",
+    pipe.load_ip_adapter("h94/IP-Adapter", subfolder="models", weight_name=a.ip_weight,
                          image_encoder_folder="models/image_encoder", torch_dtype=DT)
     pipe.set_ip_adapter_scale(a.ip_scale)
     ref = Image.open(a.hero).convert("RGB")
@@ -57,10 +58,8 @@ for c in clips:
               width=c.get("w", a.w), height=c.get("h", a.h), generator=torch.Generator().manual_seed(c["seed"] + 1000 * a.variant),
               decode_chunk_size=2)
     if use_ip:
-        if c["hero"]:
-            kw["ip_adapter_image"] = ref
-        else:
-            pipe.set_ip_adapter_scale(0.0); kw["ip_adapter_image"] = ref
+        sc = 0.0 if (not c["hero"] or c.get("ip") == "none") else c.get("ip_scale", a.ip_scale)
+        pipe.set_ip_adapter_scale(sc); kw["ip_adapter_image"] = ref
     frames = pipe(**kw).frames[0]
     if use_ip:
         pipe.set_ip_adapter_scale(a.ip_scale)

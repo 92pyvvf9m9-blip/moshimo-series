@@ -1,0 +1,14 @@
+# Python side of the toolchain (CPU). torch is installed separately from the CPU wheel index (see setup.sh).
+diffusers==0.43.0
+transformers
+accelerate
+safetensors
+huggingface_hub
+faster-whisper
+yt-dlp
+pyloudnorm
+numpy
+scipy
+pillow
+imageio
+imageio-ffmpeg

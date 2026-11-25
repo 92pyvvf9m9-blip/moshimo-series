@@ -28,9 +28,25 @@ def run(cmd):
 
 # ---------------- video: concatenate cuts ----------------
 lst = os.path.join(TMP, "cuts.txt")
+
+
+def nframes(path):
+    out = subprocess.run(["ffprobe", "-v", "error", "-count_packets", "-select_streams", "v:0", "-show_entries",
+                          "stream=nb_read_packets", "-of", "csv=p=0", path], capture_output=True, text=True).stdout
+    return int(out.strip() or 0)
+
+
 with open(lst, "w") as f:
-    for c in E["cuts"]:
-        f.write(f"file '{os.path.abspath(os.path.join(CUTS, c[0] + '.mp4'))}'\n")
+    for k, c in enumerate(E["cuts"]):
+        src = os.path.abspath(os.path.join(CUTS, c[0] + ".mp4"))
+        n = round(c[2] * FPS) - round(c[1] * FPS)
+        off = c[4] if len(c) > 4 else 0.0
+        if off or nframes(src) != n:
+            dst = os.path.join(TMP, f"trim_{k:02d}_{c[0]}.mp4")
+            run(["ffmpeg", "-v", "error", "-y", "-ss", f"{off:.3f}", "-i", src, "-frames:v", str(n), "-an",
+                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "14", "-pix_fmt", "yuv420p", "-r", str(FPS), dst])
+            src = dst
+        f.write(f"file '{src}'\n")
 video = os.path.join(TMP, "video.mp4")
 run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", video])
 
@@ -43,10 +59,20 @@ def read_audio(path, ch=2):
 
 
 n_total = int(round(TOTAL * SR))
-narr_src = read_audio(os.path.join(AUD, E["narration"]["file"]), 1)[0]
+TEMPO = float(E["narration"].get("tempo", 1.0))
+
+
+def read_narr(path):
+    af = ["-af", f"atempo={TEMPO}"] if TEMPO != 1.0 else []
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, *af, "-f", "f32le", "-ac", "1", "-ar", str(SR), "-"],
+                         capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.float32).copy()
+
+
+narr_src = read_narr(os.path.join(AUD, E["narration"]["file"]))
 narr = np.zeros(n_total, np.float32)
 for a, b, p in E["narration"]["lines"]:
-    seg = narr_src[int(a * SR):int(b * SR)].copy()
+    seg = narr_src[int(a / TEMPO * SR):int(b / TEMPO * SR)].copy()
     fl = int(0.008 * SR)
     seg[:fl] *= np.linspace(0, 1, fl); seg[-fl:] *= np.linspace(1, 0, fl)
     i = int(round(p * SR))
@@ -124,8 +150,8 @@ with wave.open(wav, "wb") as w:
 
 # ---------------- telops (ASS) ----------------
 def line_map(idx, t):
-    a, b, p = E["narration"]["lines"][idx]
-    return p + (t - a)
+    a, b, p = E["narration"]["all_lines"][idx] if "all_lines" in E["narration"] else E["narration"]["lines"][idx]
+    return p + (t - a) / TEMPO
 
 
 def ts(t):

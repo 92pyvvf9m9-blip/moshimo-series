@@ -1,0 +1,12 @@
+{
+  "name": "moshimo-series-video-tools",
+  "private": true,
+  "description": "Video editing toolchain for the もしもシリーズ shorts (Remotion, HyperFrames).",
+  "dependencies": {
+    "@remotion/cli": "4.0.547",
+    "remotion": "4.0.547",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "hyperframes": "0.9.96"
+  }
+}

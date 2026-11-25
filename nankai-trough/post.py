@@ -17,7 +17,8 @@ ap.add_argument("--ids"); ap.add_argument("--pick", action="append", default=[])
 a = ap.parse_args()
 E = json.load(open(a.edit, encoding="utf-8"))
 W, H, FPS = E["width"], E["height"], E["fps"]
-pick = dict(p.split("=") for p in a.pick)
+pick = dict(E.get("picks", {}))
+pick.update(dict(p.split("=") for p in a.pick))
 os.makedirs(a.out, exist_ok=True)
 
 
@@ -56,8 +57,16 @@ def camera(style, n, seed):
         dx = 9 * np.sin(np.pi * 1.5 * t + seed) + smooth_noise(n, FPS, 0.5, 1.5, seed + 1) * 6
         rot = 0.7 * np.sin(np.pi * 1.5 * t + seed + 0.6)
         z = np.full(n, 1.10)
-    elif style in ("handheld", "night", "night_d4n", "shelter"):
-        amp = {"handheld": 8, "night": 6, "night_d4n": 4, "shelter": 5}[style]
+    elif style == "ash_walk":
+        dy = 6 * np.abs(np.sin(np.pi * 1.9 * t)) - 3 + smooth_noise(n, FPS, 0.4, 1.2, seed) * 3
+        dx = 5 * np.sin(np.pi * 0.95 * t + seed) + smooth_noise(n, FPS, 0.3, 1.0, seed + 1) * 4
+        rot = 0.35 * np.sin(np.pi * 0.95 * t + seed + 0.6)
+        z = np.full(n, 1.08)
+    elif style == "erupt":
+        dx, dy, rot = hand(5, 0.15, 0.2, 0.8)
+        z = 1.04 + 0.07 * (0.5 - 0.5 * np.cos(np.pi * np.linspace(0, 1, n)))
+    elif style in ("handheld", "night", "night_d4n", "shelter", "handheld_day", "ash_light", "ash", "ash_night", "ash_dawn", "ash_dusk", "night_end"):
+        amp = {"handheld": 8, "night": 6, "night_d4n": 4, "shelter": 5}.get(style, 6)
         dx, dy, rot = hand(amp, 0.25)
         z = np.linspace(1.06, 1.085, n)
     elif style in ("dawn", "dawn_push", "ominous"):
@@ -75,9 +84,18 @@ GRADES = {
     "dawn":    ((1.05, 0.99, 0.96), (0.030, 0.026, 0.030), 0.92, 0.96, 1.02),
     "ominous": ((0.92, 0.95, 1.04), (0.006, 0.008, 0.014), 0.55, 1.12, 0.80),
     "dayfornight": ((0.50, 0.68, 1.00), (0.002, 0.006, 0.016), 0.30, 1.22, 0.40),
+    "day":       ((1.03, 1.00, 0.95), (0.012, 0.014, 0.020), 0.88, 1.06, 1.00),
+    "ash_light": ((1.00, 0.97, 0.90), (0.030, 0.028, 0.026), 0.55, 0.96, 0.86),
+    "ash":       ((0.98, 0.95, 0.88), (0.045, 0.042, 0.038), 0.38, 0.92, 0.80),
+    "ash_night": ((0.78, 0.86, 1.02), (0.006, 0.008, 0.016), 0.30, 1.08, 0.55),
+    "ash_dawn":  ((1.02, 0.97, 0.92), (0.050, 0.046, 0.044), 0.40, 0.92, 0.92),
+    "ash_dusk":  ((1.05, 0.95, 0.85), (0.030, 0.026, 0.026), 0.45, 1.00, 0.80),
+    "night_end": ((0.85, 0.90, 1.05), (0.004, 0.006, 0.012), 0.40, 1.15, 0.62),
 }
 STYLE_GRADE = {"quake": "dusk", "quake_peak": "dusk", "aftershake": "dusk", "run": "dusk", "handheld": "dusk",
-               "night": "night", "night_d4n": "dayfornight", "shelter": "shelter", "dawn": "dawn", "dawn_push": "dawn", "ominous": "ominous"}
+               "night": "night", "night_d4n": "dayfornight",
+               "erupt": "day", "handheld_day": "day", "ash_light": "ash_light", "ash": "ash", "ash_walk": "ash",
+               "ash_night": "ash_night", "ash_dawn": "ash_dawn", "ash_dusk": "ash_dusk", "night_end": "night_end", "shelter": "shelter", "dawn": "dawn", "dawn_push": "dawn", "ominous": "ominous"}
 
 yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
 R2 = ((xx - W / 2) / (W / 2)) ** 2 * 0.8 + ((yy - H / 2) / (H / 2)) ** 2 * 0.6
@@ -196,10 +214,46 @@ def apply_sign(frame, t, fx, fps):
     return out[..., :3].clip(0, 255).astype(np.uint8)
 
 
+# ---------- falling volcanic ash (screen-space particles, persistent within a cut) ----------
+class AshFall:
+    def __init__(self, n, density, night=False, seed=0):
+        r = np.random.default_rng(seed + 991)
+        k = int(900 * density)
+        self.night = night
+        self.depth = r.uniform(0.15, 1.0, k)                    # 1 = near the camera
+        self.x = r.uniform(-60, W + 60, k)
+        self.y = r.uniform(-H * 0.1, H, k)
+        self.vy = (40 + 210 * self.depth) * r.uniform(0.8, 1.2, k)
+        self.vx = r.uniform(8, 38, k) * self.depth
+        self.ph = r.uniform(0, 6.28, k)
+        self.size = 0.8 + 4.2 * self.depth ** 1.6
+        self.alpha = (0.25 + 0.55 * self.depth) * r.uniform(0.6, 1.0, k)
+
+    def step(self, i):
+        dt = 1 / FPS
+        t = i * dt
+        self.y += self.vy * dt
+        self.x += (self.vx + 14 * np.sin(1.3 * t + self.ph)) * dt
+        wrap = self.y > H + 20
+        self.y[wrap] -= H + 60
+        self.x[self.x > W + 60] -= W + 120
+
+    def draw(self, fr):
+        lay = Image.new("L", (W, H), 0)
+        d = ImageDraw.Draw(lay)
+        for x, y, s_, a_, vy in zip(self.x, self.y, self.size, self.alpha, self.vy):
+            streak = vy / FPS * 0.5
+            d.ellipse([x - s_, y - s_ - streak, x + s_, y + s_], fill=int(255 * a_))
+        m = np.asarray(lay.filter(ImageFilter.GaussianBlur(1.2)), np.float32)[..., None] / 255.0
+        col = np.array([70, 72, 78] if self.night else [212, 208, 198], np.float32)
+        out = fr.astype(np.float32) * (1 - m) + col * m
+        return out.clip(0, 255).astype(np.uint8)
+
+
 def process(cut, idx):
     cid, s, e, style = cut
     src_id = pick.get(cid, cid)
-    fdir = os.path.join(a.clips, src_id + "_frames")
+    fdir = src_id if os.path.isabs(src_id) else os.path.join(a.clips, src_id + "_frames")
     f0, f1 = round(s * FPS), round(e * FPS)
     n = f1 - f0
     dur = n / FPS
@@ -222,7 +276,17 @@ def process(cut, idx):
                             "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-preset", "medium", "-crf", "15",
                             "-pix_fmt", "yuv420p", out], stdin=subprocess.PIPE)
     base = max(W / sw, H / sh)
+    rf = E.get("reframe", {}).get(cid)
+    scx, scy = sw / 2, sh / 2
+    if rf:
+        z = z * np.linspace(rf["zoom"][0], rf["zoom"][1], n)
+        scx, scy = sw * (0.5 + rf.get("cx", 0.0)), sh * (0.5 + rf.get("cy", 0.0))
     sfx_cfg = E.get("sign_fx")
+    dens = E.get("ash", {}).get(cid, 0.0)
+    ash = AshFall(n, dens, night=style in ("ash_night", "night_end"), seed=idx) if dens > 0 else None
+    if ash is not None:
+        for _ in range(int(FPS * 2)):        # pre-roll so the ash is already falling on frame 0
+            ash.step(0)
     for i in range(n):
         fr_lo = lo[i]
         if sfx_cfg and cid == sfx_cfg["cut"]:
@@ -233,7 +297,7 @@ def process(cut, idx):
         # output pixel (u,v) -> source (x,y): centre-relative rotation + scale, plus camera offset
         cu, cv = W / 2 + dx[i], H / 2 + dy[i]
         ca, sa = math.cos(th) / sc, math.sin(th) / sc
-        A = (ca, sa, sw / 2 - ca * cu - sa * cv, -sa, ca, sh / 2 + sa * cu - ca * cv)
+        A = (ca, sa, scx - ca * cu - sa * cv, -sa, ca, scy + sa * cu - ca * cv)
         fr = np.asarray(im.transform((W, H), Image.AFFINE, A, resample=Image.BICUBIC))
         flash = 0.0
         if cid == "01a" and i < 4:
@@ -245,6 +309,9 @@ def process(cut, idx):
         if cid in E.get("fade_out", {}):
             fo = E["fade_out"][cid] * FPS
             fade_mul *= min(1.0, (n - 1 - i) / fo) if fo else 1.0
+        if ash is not None:
+            ash.step(i)
+            fr = ash.draw(fr)
         enc.stdin.write(grade(fr, g, rng, flash, fade_mul).tobytes())
     enc.stdin.close(); enc.wait()
     print("post", cid, "<-", src_id, n, "frames", flush=True)
