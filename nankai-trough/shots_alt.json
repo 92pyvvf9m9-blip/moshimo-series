@@ -1,0 +1,10 @@
+{
+  "base_hero": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, a Japanese man in his 30s, short black hair, thin silver metal-frame glasses, navy business suit, white shirt, grey tie, black backpack",
+  "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Japan",
+  "negative": "",
+  "clips": [
+    {"id": "02b", "scene": 2, "hero": false, "seed": 2201, "prompt": "earthquake, debris and broken pieces falling from a building facade onto the sidewalk, cloud of dust, shattered glass, a fallen metal signboard on the pavement, dusk, street level"},
+    {"id": "06a", "scene": 6, "hero": false, "seed": 6101, "prompt": "huge dark wave crashing over a harbor breakwater, massive white spray, storm surge flooding the dock, cranes in the background, dusk, dramatic"},
+    {"id": "06c", "scene": 6, "hero": false, "seed": 6301, "prompt": "muddy flood water rushing through a street between warehouses, strong current, floating debris and a car swept away, dusk, no people"}
+  ]
+}

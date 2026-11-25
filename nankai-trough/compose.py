@@ -1,172 +1,207 @@
 #!/usr/bin/env python3
-"""Assemble the vertical short from generated shots, narration and sound.
+"""Final assembly of the Nankai Trough short.
 
-Inputs (under the work directory given as argv[1]):
-  shots/shotNN.mp4   video for each shot in timeline.json (any size; cropped to 9:16)
-  audio/narration_NN.mp3|wav   optional narration per shot, placed at the shot start (+offset)
-  audio/sfx_NN.mp3|wav         optional sound effects per shot
-  audio/bgm.mp3|wav            optional music bed (ducked low)
-Output: <work>/out/nankai_trough_reels.mp4 (1080x1920, 30fps, H.264 High, AAC 48k, -14 LUFS)
+  python compose.py EDIT.json CUTDIR AUDIODIR OUT.mp4
 
-  python3 compose.py WORKDIR [--placeholder]
---placeholder makes moving test footage so the telop/audio pipeline can be checked without credits.
+CUTDIR   finished 1080x1920/30fps cuts from post.py (<id>.mp4, in edit.json "cuts" order)
+AUDIODIR narration file named in edit.json, sfx.wav and bgm.wav from sound.py
+Telops: Noto Serif CJK JP Bold, white with a thick black outline, red/yellow emphasis, auto-fitted
+to the centre safe area. Audio: narration ducks the bed and music; master at -14 LUFS, <= -1.5 dBTP.
 """
-import json, os, re, subprocess, sys, pathlib
+import json, os, subprocess, sys, wave
+import numpy as np
+import pyloudnorm as pyln
+from scipy import signal
 
-HERE = pathlib.Path(__file__).resolve().parent
-TL = json.loads((HERE / "timeline.json").read_text(encoding="utf-8"))
-W, H, FPS = TL["width"], TL["height"], TL["fps"]
+EDIT, CUTS, AUD, OUT = sys.argv[1:5]
+E = json.load(open(EDIT, encoding="utf-8"))
+W, H, FPS, TOTAL = E["width"], E["height"], E["fps"], E["total"]
+SR = 48000
 FONT = "Noto Serif CJK JP"
-NARR_OFFSET = 0.15
+TMP = os.path.join(os.path.dirname(os.path.abspath(OUT)), "_compose_tmp")
+os.makedirs(TMP, exist_ok=True)
 
 
 def run(cmd):
-    print("+", " ".join(str(c) for c in cmd)[:300], flush=True)
     subprocess.run(cmd, check=True)
 
 
-def find(d, stem):
-    for ext in (".wav", ".mp3", ".m4a", ".flac"):
-        p = d / f"{stem}{ext}"
-        if p.exists():
-            return p
-    return None
+# ---------------- video: concatenate cuts ----------------
+lst = os.path.join(TMP, "cuts.txt")
+with open(lst, "w") as f:
+    for c in E["cuts"]:
+        f.write(f"file '{os.path.abspath(os.path.join(CUTS, c[0] + '.mp4'))}'\n")
+video = os.path.join(TMP, "video.mp4")
+run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", video])
+
+
+# ---------------- audio ----------------
+def read_audio(path, ch=2):
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-f", "f32le", "-ac", str(ch), "-ar", str(SR), "-"],
+                         capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.float32).reshape(-1, ch).T.copy()
+
+
+n_total = int(round(TOTAL * SR))
+narr_src = read_audio(os.path.join(AUD, E["narration"]["file"]), 1)[0]
+narr = np.zeros(n_total, np.float32)
+for a, b, p in E["narration"]["lines"]:
+    seg = narr_src[int(a * SR):int(b * SR)].copy()
+    fl = int(0.008 * SR)
+    seg[:fl] *= np.linspace(0, 1, fl); seg[-fl:] *= np.linspace(1, 0, fl)
+    i = int(round(p * SR))
+    narr[i:i + len(seg)] += seg[: n_total - i]
+
+
+def fit(x, n):
+    y = np.zeros((2, n), np.float32)
+    m = min(n, x.shape[1]); y[:, :m] = x[:, :m]
+    return y
+
+
+sfx = fit(read_audio(os.path.join(AUD, "sfx.wav")), n_total)
+bgm = fit(read_audio(os.path.join(AUD, "bgm.wav")), n_total)
+meter = pyln.Meter(SR)
+
+
+def set_lufs(x, target):
+    l = meter.integrated_loudness(x.T if x.ndim == 2 else x)
+    return x * (10 ** ((target - l) / 20)), l
+
+
+narr, l_n = set_lufs(narr, -16.0)
+sfx, l_s = set_lufs(sfx, -24.0)
+bgm, l_b = set_lufs(bgm, -31.0)
+# ducking envelope from the narration (attack 30 ms, release 450 ms)
+env = np.abs(narr)
+env = signal.sosfilt(signal.butter(2, 8, "lp", fs=SR, output="sos"), env)
+env = env / (np.percentile(env[env > 1e-4], 95) + 1e-9)
+env = np.clip(env, 0, 1)
+att, rel = np.exp(-1 / (0.03 * SR)), np.exp(-1 / (0.45 * SR))
+sm = np.zeros_like(env); v = 0.0
+for i in range(0, len(env), 48):           # 1 ms control rate
+    tgt = env[i]
+    v = tgt + (v - tgt) * (att ** 48 if tgt > v else rel ** 48)
+    sm[i:i + 48] = v
+duck_b = 1 - 0.55 * sm
+duck_s = 1 - 0.40 * sm
+duck_s[: int(0.6 * SR)] = 1.0                # never duck the opening impact
+mix = np.stack([narr, narr]) * 1.0 + sfx * duck_s + bgm * duck_b
+
+
+def limiter(x, ceiling_db=-2.0, look=0.005, release=0.12):
+    """Look-ahead peak limiter on a 4x-oversampled (true-peak) estimate, 1 ms control rate."""
+    from scipy.ndimage import minimum_filter1d
+    c = 10 ** (ceiling_db / 20)
+    n = x.shape[1]
+    up = signal.resample_poly(x, 4, 1, axis=1)
+    pk = np.max(np.abs(up), axis=0)[: 4 * n].reshape(-1, 4).max(axis=1)
+    need = np.minimum(1.0, c / np.maximum(pk, 1e-9))
+    need = minimum_filter1d(need, size=2 * int(look * SR) + 1)
+    B = 48
+    nb = -(-n // B)
+    blk = np.pad(need, (0, nb * B - n), constant_values=1.0).reshape(nb, B).min(axis=1)
+    r = np.exp(-B / (release * SR))
+    g = np.empty(nb); v = 1.0
+    for i, b in enumerate(blk):
+        v = b if b < v else b + (v - b) * r
+        g[i] = v
+    return x * np.repeat(g, B)[:n]
+
+
+for _ in range(3):
+    l = meter.integrated_loudness(mix.T)
+    mix = mix * (10 ** ((-14.0 - l) / 20))
+    mix = limiter(mix, -2.0)
+l_final = meter.integrated_loudness(mix.T)
+tp = 20 * np.log10(np.max(np.abs(signal.resample_poly(mix, 4, 1, axis=1))) + 1e-12)
+print(f"loudness: narr {l_n:.1f} sfx {l_s:.1f} bgm {l_b:.1f} -> master {l_final:.2f} LUFS, true peak {tp:.2f} dBTP")
+wav = os.path.join(TMP, "mix.wav")
+with wave.open(wav, "wb") as w:
+    w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
+    w.writeframes((np.clip(mix.T, -1, 1) * 32767).astype("<i2").tobytes())
+
+
+# ---------------- telops (ASS) ----------------
+def line_map(idx, t):
+    a, b, p = E["narration"]["lines"][idx]
+    return p + (t - a)
 
 
 def ts(t):
-    h = int(t // 3600); m = int(t % 3600 // 60); s = t % 60
-    return f"{h}:{m:02d}:{s:05.2f}"
+    t = max(0.0, t)
+    return f"{int(t // 3600)}:{int(t % 3600 // 60):02d}:{t % 60:05.2f}"
 
 
-def ass_text(s):
-    # {R}..{/} red, {Y}..{/} yellow (ASS colours are &HBBGGRR&)
-    s = s.replace("{R}", r"{\c&H2A2AE6&}").replace("{Y}", r"{\c&H00D7FF&}").replace("{/}", r"{\c&HFFFFFF&}")
-    return s
+def text_units(s):
+    import re
+    s = re.sub(r"\{[^}]*\}", "", s)
+    return sum(0.62 if ord(ch) < 0x2E80 and ch not in "“”" else 1.0 for ch in s)
 
 
-def build_ass(path):
-    head = f"""[Script Info]
+def colorize(s):
+    return s.replace("{R}", r"{\c&H2B2BE8&}").replace("{Y}", r"{\c&H00D9FF&}").replace("{/}", r"{\c&HFFFFFF&}")
+
+
+SIZES = {"title": 112, "normal": 92, "big": 140}
+MAXW = 860
+ev = []
+tel = []
+for t in E["telops"]:
+    text, idx, s, e = t[0], t[1], t[2], t[3]
+    style = t[4] if len(t) > 4 else "normal"
+    note = t[5] if len(t) > 5 else None
+    tel.append([line_map(idx, s), line_map(idx, e), text, style, note])
+tel.sort(key=lambda x: x[0])
+for i in range(len(tel) - 1):                      # never overlap: clamp to next start
+    tel[i][1] = min(tel[i][1], tel[i + 1][0])
+for s, e, text, style, note in tel:
+    size = SIZES[style]
+    size = int(min(size, MAXW / max(1.0, text_units(text))))
+    outline = max(6, int(size * 0.085))
+    y = 900 if style == "title" else 940
+    anim = r"\fad(70,50)\t(0,110,\fscx106\fscy106)\t(110,200,\fscx100\fscy100)"
+    ev.append(f"Dialogue: 2,{ts(s)},{ts(e)},Telop,,0,0,0,,{{\\pos({W // 2},{y})\\fs{size}\\bord{outline}{anim}}}{colorize(text)}")
+# source notes: merge contiguous telops that share a note
+groups = []
+for s, e, text, style, note in tel:
+    if not note:
+        continue
+    if groups and groups[-1][2] == note and s - groups[-1][1] < 0.6:
+        groups[-1][1] = e
+    else:
+        groups.append([s, e, note])
+for s, e, note in groups:
+    txt = E["src_notes"].get(note, E["src_main"])
+    size = int(min(28, MAXW / text_units(txt)))
+    ev.append(f"Dialogue: 1,{ts(s)},{ts(e + 0.3)},Note,,0,0,0,,{{\\pos({W // 2},1352)\\fs{size}\\fad(120,120)}}{txt}")
+ev.append(f"Dialogue: 0,{ts(0)},{ts(TOTAL)},Disc,,0,0,0,,{{\\pos({W // 2},1300)}}{E['disclaimer']}")
+ass = os.path.join(TMP, "telop.ass")
+with open(ass, "w", encoding="utf-8") as f:
+    f.write(f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
 PlayResY: {H}
 WrapStyle: 2
 ScaledBorderAndShadow: yes
+YCbCr Matrix: TV.709
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Telop,{FONT},104,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,2,0,1,9,3,5,90,90,0,1
-Style: Big,{FONT},150,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,2,0,1,12,4,5,90,90,0,1
-Style: Title,{FONT},124,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,4,0,1,11,4,5,90,90,0,1
-Style: Source,{FONT},30,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,1,2,90,90,0,1
-Style: Disc,{FONT},34,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,1,2,90,90,0,1
+Style: Telop,{FONT},92,&H00FFFFFF,&H00FFFFFF,&H00000000,&H78000000,-1,0,0,0,100,100,2,0,1,8,3,5,60,60,0,1
+Style: Note,{FONT},28,&H00F0F0F0,&H00FFFFFF,&H00000000,&H78000000,-1,0,0,0,100,100,0,0,1,3,1,5,60,60,0,1
+Style: Disc,{FONT},30,&H00FFFFFF,&H00FFFFFF,&H00000000,&H78000000,-1,0,0,0,100,100,0,0,1,3,1,5,60,60,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-"""
-    ev = []
-    t0 = 0.0
-    total = sum(s["dur"] for s in TL["shots"])
-    # constant disclaimer, kept above the Reels caption/UI band
-    ev.append(f"Dialogue: 0,{ts(0)},{ts(total)},Disc,,0,0,470,,{TL['disclaimer']}")
-    for s in TL["shots"]:
-        for item in s["telops"]:
-            text, a, b = item[0], item[1], item[2]
-            kind = item[3] if len(item) > 3 else "normal"
-            style = {"title": "Title", "big": "Big"}.get(kind, "Telop")
-            y = 860 if kind == "title" else 940
-            pop = r"{\fad(80,60)\t(0,120,\fscx104\fscy104)\t(120,220,\fscx100\fscy100)}"
-            ev.append(f"Dialogue: 1,{ts(t0+a)},{ts(t0+b)},{style},,0,0,0,,{{\\pos({W//2},{y})}}{pop}{ass_text(text)}")
-        if s.get("src"):
-            ev.append(f"Dialogue: 0,{ts(t0+0.2)},{ts(t0+s['dur'])},Source,,0,0,420,,{TL['source_note']}")
-        t0 += s["dur"]
-    path.write_text(head + "\n".join(ev) + "\n", encoding="utf-8")
-    return total
+""" + "\n".join(ev) + "\n")
 
-
-def placeholder(shots_dir):
-    shots_dir.mkdir(parents=True, exist_ok=True)
-    for s in TL["shots"]:
-        out = shots_dir / f"shot{s['id']:02d}.mp4"
-        if out.exists():
-            continue
-        hue = s["id"] * 30
-        run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
-             f"testsrc2=s=720x1280:r={FPS}:d={s['dur']}", "-vf",
-             f"hue=h={hue}:s=0.4,eq=brightness=-0.15,drawtext=fontfile=/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc:text='PLACEHOLDER SHOT {s['id']}':fontsize=40:fontcolor=white:x=40:y=60",
-             "-pix_fmt", "yuv420p", str(out)])
-
-
-def main():
-    work = pathlib.Path(sys.argv[1]).resolve()
-    if "--placeholder" in sys.argv:
-        placeholder(work / "shots")
-    out_dir = work / "out"; out_dir.mkdir(parents=True, exist_ok=True)
-    tmp = work / "tmp"; tmp.mkdir(exist_ok=True)
-
-    # 1) normalise every shot to exact length, 1080x1920, 30fps, with a gentle handheld drift
-    parts = []
-    for s in TL["shots"]:
-        src = work / "shots" / f"shot{s['id']:02d}.mp4"
-        dst = tmp / f"n{s['id']:02d}.mp4"
-        vf = (f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},"
-              f"tpad=stop_mode=clone:stop_duration={s['dur']},trim=duration={s['dur']},setpts=PTS-STARTPTS,"
-              "eq=contrast=1.04:saturation=0.92,format=yuv420p")
-        run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-an", "-vf", vf,
-             "-c:v", "libx264", "-preset", "medium", "-crf", "16", str(dst)])
-        parts.append(dst)
-    lst = tmp / "list.txt"
-    lst.write_text("".join(f"file '{p}'\n" for p in parts))
-    joined = tmp / "joined.mp4"
-    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(joined)])
-
-    # 2) telops
-    ass = tmp / "telop.ass"
-    total = build_ass(ass)
-
-    # 3) audio mix: narration (front), sfx, bgm (low), then loudness normalise to -14 LUFS
-    adir = work / "audio"
-    inputs, filters, labels = [], [], []
-    t0 = 0.0
-    idx = 0
-    for s in TL["shots"]:
-        for kind, gain in (("narration", 1.0), ("sfx", 0.55)):
-            p = find(adir, f"{kind}_{s['id']:02d}")
-            if p:
-                inputs += ["-i", str(p)]
-                idx += 1
-                delay = int((t0 + (NARR_OFFSET if kind == "narration" else 0)) * 1000)
-                filters.append(f"[{idx}:a]aresample=48000,volume={gain},adelay={delay}|{delay}[a{idx}]")
-                labels.append(f"[a{idx}]")
-        t0 += s["dur"]
-    bgm = find(adir, "bgm")
-    if bgm:
-        inputs += ["-stream_loop", "-1", "-i", str(bgm)]
-        idx += 1
-        filters.append(f"[{idx}:a]aresample=48000,volume=0.12,atrim=0:{total},afade=t=out:st={total-2}:d=2[a{idx}]")
-        labels.append(f"[a{idx}]")
-    silent = f"anullsrc=r=48000:cl=stereo,atrim=0:{total}[base]"
-    mix = f"[base]{''.join(labels)}amix=inputs={len(labels)+1}:normalize=0:duration=first[mix]"
-    fc = ";".join([silent] + filters + [mix])
-    premix = tmp / "premix.wav"
-    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc", *inputs,
-         "-filter_complex", fc.replace("[0:a]", ""), "-map", "[mix]", "-t", str(total), str(premix)])
-    # two-pass loudnorm
-    r = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(premix), "-af",
-                        "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json", "-f", "null", "-"],
-                       capture_output=True, text=True)
-    m = json.loads(re.search(r"\{[^{}]+\}\s*$", r.stderr, re.S).group(0))
-    lin = "linear=true" if float(m["input_i"]) > -70 else "linear=false"
-    ln = (f"loudnorm=I=-14:TP=-1.5:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
-          f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:offset={m['target_offset']}:{lin}")
-
-    out = out_dir / "nankai_trough_reels.mp4"
-    run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(joined), "-i", str(premix),
-         "-filter_complex", f"[0:v]ass={ass}:fontsdir=/usr/share/fonts/opentype/noto[v];[1:a]{ln},aresample=48000[a]",
-         "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-profile:v", "high", "-level", "4.1",
-         "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(FPS),
-         "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart", "-t", str(total), str(out)])
-    print("wrote", out)
-
-
-if __name__ == "__main__":
-    main()
+# ---------------- final encode ----------------
+run(["ffmpeg", "-v", "error", "-y", "-i", video, "-i", wav,
+     "-filter_complex", f"[0:v]ass={ass}:fontsdir=/usr/share/fonts/opentype/noto,format=yuv420p[v]",
+     "-map", "[v]", "-map", "1:a", "-c:v", "libx264", "-profile:v", "high", "-level", "4.2", "-preset", "slow",
+     "-crf", "20", "-maxrate", "14M", "-bufsize", "28M", "-r", str(FPS), "-g", str(FPS * 2),
+     "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
+     "-c:a", "aac", "-b:a", "256k", "-ar", str(SR), "-ac", "2", "-movflags", "+faststart",
+     "-t", f"{TOTAL:.3f}", OUT])
+print("wrote", OUT)
