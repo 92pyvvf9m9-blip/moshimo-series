@@ -185,7 +185,7 @@ for s, e, text, style, note in tel:
     size = SIZES[style]
     size = int(min(size, MAXW / max(1.0, text_units(text))))
     outline = max(6, int(size * 0.085))
-    y = 900 if style == "title" else 940
+    y = 1060 if style == "title" else 940
     anim = r"\fad(70,50)\t(0,110,\fscx106\fscy106)\t(110,200,\fscx100\fscy100)"
     ev.append(f"Dialogue: 2,{ts(s)},{ts(e)},Telop,,0,0,0,,{{\\pos({W // 2},{y})\\fs{size}\\bord{outline}{anim}}}{colorize(text)}")
 # source notes: merge contiguous telops that share a note
@@ -226,7 +226,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 run(["ffmpeg", "-v", "error", "-y", "-i", video, "-i", wav,
      "-filter_complex", f"[0:v]ass={ass}:fontsdir=/usr/share/fonts/opentype/noto,format=yuv420p[v]",
      "-map", "[v]", "-map", "1:a", "-c:v", "libx264", "-profile:v", "high", "-level", "4.2", "-preset", "slow",
-     "-crf", "20", "-maxrate", "14M", "-bufsize", "28M", "-r", str(FPS), "-g", str(FPS * 2),
+     "-crf", "21", "-maxrate", "9M", "-bufsize", "18M", "-r", str(FPS), "-g", str(FPS * 2),
      "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
      "-c:a", "aac", "-b:a", "256k", "-ar", str(SR), "-ac", "2", "-movflags", "+faststart",
      "-t", f"{TOTAL:.3f}", OUT])

@@ -1,0 +1,38 @@
+{
+ "base_hero": "RAW photo, cinematic film still, photorealistic, handheld camera, 35mm film grain, a Japanese salaryman in his mid 30s, short black hair, silver metal-frame glasses, dark navy blue suit, white shirt, dark tie, black backpack",
+ "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Shizuoka city Japan",
+ "negative": "",
+ "clips": [
+  {
+   "id": "04a",
+   "scene": 4,
+   "hero": true,
+   "ip": "face",
+   "ip_scale": 0.45,
+   "seed": 4402,
+   "w": 512,
+   "h": 640,
+   "prompt": "wearing a dark navy blue suit jacket, close-up from below, he stares at a glowing smartphone in his hand, the screen light on his face, worried, dusk street"
+  },
+  {
+   "id": "04b",
+   "scene": 4,
+   "hero": true,
+   "ip": "none",
+   "seed": 4412,
+   "w": 512,
+   "h": 640,
+   "prompt": "seen from behind, a man in a dark navy blue suit jacket with a black backpack turns his head toward the sea at the end of a sloping street, dusk, distant bay"
+  },
+  {
+   "id": "06b",
+   "scene": 6,
+   "hero": true,
+   "ip": "none",
+   "seed": 6212,
+   "w": 512,
+   "h": 640,
+   "prompt": "one man alone, seen from behind, dark navy blue suit jacket and black backpack, standing on a hillside road looking down at the sea and a port far below, dusk"
+  }
+ ]
+}

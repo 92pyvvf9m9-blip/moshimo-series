@@ -1,0 +1,18 @@
+{
+ "base_hero": "RAW photo, cinematic film still, photorealistic, handheld camera, 35mm film grain, a Japanese salaryman in his mid 30s, short black hair, silver metal-frame glasses, dark navy blue suit, white shirt, dark tie, black backpack",
+ "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Shizuoka city Japan",
+ "negative": "",
+ "clips": [
+  {
+   "id": "11a",
+   "scene": 11,
+   "hero": true,
+   "ip": "face",
+   "ip_scale": 0.4,
+   "seed": 11202,
+   "w": 512,
+   "h": 640,
+   "prompt": "wearing a dark navy blue suit jacket and white shirt, close-up side profile in warm morning light, looking into the distance, calm and serious, slight wind"
+  }
+ ]
+}
