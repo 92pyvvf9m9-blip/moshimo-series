@@ -54,7 +54,7 @@ for c in clips:
     prompt = f"{base}, {c['prompt']}"
     t = time.time()
     kw = dict(prompt=prompt, guidance_scale=1.0, num_inference_steps=4, num_frames=16,
-              width=a.w, height=a.h, generator=torch.Generator().manual_seed(c["seed"] + 1000 * a.variant),
+              width=c.get("w", a.w), height=c.get("h", a.h), generator=torch.Generator().manual_seed(c["seed"] + 1000 * a.variant),
               decode_chunk_size=2)
     if use_ip:
         if c["hero"]:

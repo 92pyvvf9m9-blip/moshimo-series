@@ -315,13 +315,14 @@ def pulse(d, bpm=56, f=55):
 
 
 # ---------- arrangement ----------
-def build(scenes, total, outdir):
+def build(scenes, total, outdir, sign_impact=None):
     S = {int(k): v for k, v in scenes.items()}
     st = lambda i: S[i][0]
     en = lambda i: S[i][1]
     dur = lambda i: S[i][1] - S[i][0]
     fx = Bus(total)
     mu = Bus(total)
+    SIGN_IMPACT = sign_impact if sign_impact is not None else st(2) + dur(2) * 0.55 + 0.35
 
     # 1-3: the quake. Impact at 0, long rumble that peaks in scene 3 and fades through scene 4.
     fx.add(wet(quake_impact(3.5), IR_STREET, 0.3), 0.0, 1.0)
@@ -331,7 +332,7 @@ def build(scenes, total, outdir):
     inten = np.interp(tq, [0, 0.6, st(3), st(3) + dur(3) * 0.6, st(4), q_end], [0.7, 1.0, 1.0, 1.15, 0.55, 0.0])
     fx.add(wet(fade(quake_rumble(qd, inten), 0.02, 1.2), IR_STREET, 0.25), 0.0, 0.85)
     fx.add(wet(glass_stress(2.2), IR_STREET, 0.4), st(2) + 0.1, 0.8, 0.3)
-    fx.add(wet(sign_crash(1.8), IR_STREET, 0.35), st(2) + dur(2) * 0.55, 0.9, -0.25)
+    fx.add(wet(sign_crash(1.8), IR_STREET, 0.35), SIGN_IMPACT - 0.35, 0.9, -0.25)
     fx.add(wet(car_alarm(en(4) - st(3)), IR_FAR, 0.6), st(3) + 0.4, 0.12, 0.6)
 
     # 4: phone alert, then outdoor siren that carries through scene 6
@@ -404,5 +405,5 @@ def write_wav(path, x):
 
 if __name__ == "__main__":
     cfg = json.load(open(sys.argv[1]))
-    build(cfg["scenes"], cfg["total"], sys.argv[2])
+    build(cfg["scenes"], cfg["total"], sys.argv[2], cfg.get("sign_impact"))
     print("ok")

@@ -1,35 +1,233 @@
 {
-  "base_hero": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, a Japanese man in his 30s, short black hair, thin silver metal-frame glasses, navy business suit, white shirt, grey tie, black backpack",
-  "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Shizuoka city Japan",
-  "negative": "cartoon, anime, illustration, painting, drawing, 3d render, cgi, text, letters, watermark, logo, readable sign, deformed, disfigured, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts, gore, blood, corpse, injured person",
-  "clips": [
-    {"id": "01a", "scene": 1, "hero": true,  "seed": 11, "prompt": "walking toward camera across a busy train station plaza at dusk, commuters, modern station building behind, golden hour"},
-    {"id": "01b", "scene": 1, "hero": true,  "seed": 12, "prompt": "stumbling and looking back over his shoulder in shock, station plaza at dusk, people crouching, dust in the air"},
-    {"id": "02a", "scene": 2, "hero": false, "seed": 21, "prompt": "low angle looking up at a tall glass office tower at dusk, the building swaying, dramatic sky, birds scattering"},
-    {"id": "02b", "scene": 2, "hero": false, "seed": 22, "prompt": "a large metal shop signboard falling from a building onto an empty sidewalk, debris and dust, dusk, street level"},
-    {"id": "03a", "scene": 3, "hero": true,  "seed": 31, "prompt": "crouching low on the sidewalk covering his head with his backpack, people crouching behind him, station street at dusk, dust"},
-    {"id": "03b", "scene": 3, "hero": true,  "seed": 32, "prompt": "close-up of his face while crouching, eyes shut, bracing, dust falling, dusk light"},
-    {"id": "04a", "scene": 4, "hero": true,  "seed": 41, "prompt": "close-up of his face lit by a smartphone screen, worried expression, looking at the phone, dusk street"},
-    {"id": "04b", "scene": 4, "hero": true,  "seed": 42, "prompt": "turning around to look toward the sea at the end of the street, back view, dusk, a distant bay and mountains"},
-    {"id": "05a", "scene": 5, "hero": true,  "seed": 51, "prompt": "running up a steep narrow residential street, back view, camera following, houses and utility poles, dusk"},
-    {"id": "05b", "scene": 5, "hero": true,  "seed": 52, "prompt": "running toward the camera up a hill road, panting, other people running behind him, dusk, motion blur"},
-    {"id": "06a", "scene": 6, "hero": false, "seed": 61, "prompt": "wide view of an industrial port with cranes, a huge dark tsunami wave flooding over the seawall into the port, dusk, spray"},
-    {"id": "06b", "scene": 6, "hero": true,  "seed": 62, "prompt": "standing on a hillside road looking back down toward the sea, shocked, back view, the port far below, dusk"},
-    {"id": "06c", "scene": 6, "hero": false, "seed": 63, "prompt": "muddy tsunami water surging through empty port streets, cars and debris carried away, warehouses, dusk, no people"},
-    {"id": "07a", "scene": 7, "hero": true,  "seed": 71, "prompt": "walking slowly along a pitch dark residential street at night holding a smartphone flashlight, power outage, no street lights"},
-    {"id": "07b", "scene": 7, "hero": false, "seed": 72, "prompt": "a dark Japanese city skyline at night with every light out, blackout, faint moonlight, silhouettes of buildings"},
-    {"id": "08a", "scene": 8, "hero": true,  "seed": 81, "prompt": "standing still at night on a dark hill road, back view, looking at the distant city, orange glow on the horizon"},
-    {"id": "08b", "scene": 8, "hero": false, "seed": 82, "prompt": "distant fires and rising smoke over a dark city at night, orange glow reflected on clouds, long lens"},
-    {"id": "08c", "scene": 8, "hero": false, "seed": 83, "prompt": "fire glow and smoke behind dark houses at night, embers in the air, seen from a distance"},
-    {"id": "09a", "scene": 9, "hero": false, "seed": 91, "prompt": "inside a school gymnasium used as an evacuation shelter at night, people sitting on blankets, flashlights, emergency lights, quiet"},
-    {"id": "09b", "scene": 9, "hero": true,  "seed": 92, "prompt": "sitting on a grey blanket on a gymnasium floor at night, receiving a blanket, tired, flashlight light, evacuation shelter"},
-    {"id": "09c", "scene": 9, "hero": false, "seed": 93, "prompt": "a battery lantern on a gymnasium floor, people resting under blankets in the background, dim warm light, night"},
-    {"id": "10a", "scene": 10,"hero": false, "seed": 101,"prompt": "dawn view from a hill over Shizuoka city and Suruga Bay, Mount Fuji in the distance, mist, soft pink light"},
-    {"id": "10b", "scene": 10,"hero": true,  "seed": 102,"prompt": "standing on a hilltop at dawn, back view, looking down at the city and the bay, Mount Fuji in the distance, wind"},
-    {"id": "10c", "scene": 10,"hero": true,  "seed": 103,"prompt": "side profile at dawn on a hilltop, looking down at the city, soft morning light on his face, wind in his hair"},
-    {"id": "11a", "scene": 11,"hero": true,  "seed": 111,"prompt": "close-up side profile in warm morning light, eyes looking into the distance, calm and serious, slight wind"},
-    {"id": "11b", "scene": 11,"hero": false, "seed": 112,"prompt": "the city and the calm bay below in early morning light, seen from a hill, quiet, haze"},
-    {"id": "12a", "scene": 12,"hero": false, "seed": 121,"prompt": "Mount Fuji at dawn seen from Shizuoka, slow push in, clouds moving around the summit"},
-    {"id": "12b", "scene": 12,"hero": false, "seed": 122,"prompt": "Mount Fuji summit under dark heavy clouds, ominous, dim light, wind"}
-  ]
+ "base_hero": "RAW photo, cinematic film still, photorealistic, handheld camera, 35mm film grain, a Japanese salaryman in his mid 30s, short black hair, silver metal-frame glasses, dark navy blue suit, white shirt, dark tie, black backpack",
+ "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Shizuoka city Japan",
+ "negative": "cartoon, anime, illustration, painting, drawing, 3d render, cgi, text, letters, watermark, logo, readable sign, deformed, disfigured, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts, gore, blood, corpse, injured person",
+ "clips": [
+  {
+   "id": "01a",
+   "scene": 1,
+   "hero": true,
+   "seed": 11,
+   "prompt": "walking toward the camera mid-stride across a busy train station plaza at dusk, commuters around him, golden hour light",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "01b",
+   "scene": 1,
+   "hero": true,
+   "seed": 12,
+   "prompt": "stumbling sideways and looking back over his shoulder in shock, station plaza at dusk, people crouching, dust in the air",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "02a",
+   "scene": 2,
+   "hero": false,
+   "seed": 21,
+   "prompt": "low angle looking up at a tall glass office tower at dusk, the building swaying, dramatic sky, birds scattering"
+  },
+  {
+   "id": "02b",
+   "scene": 2,
+   "hero": false,
+   "seed": 22,
+   "prompt": "a large metal shop signboard falling from a building onto an empty sidewalk, debris and dust, dusk, street level"
+  },
+  {
+   "id": "03a",
+   "scene": 3,
+   "hero": true,
+   "seed": 31,
+   "prompt": "crouching down low on the sidewalk, covering his head with his arms, people crouching behind him, city street at dusk, dust",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "03b",
+   "scene": 3,
+   "hero": true,
+   "seed": 32,
+   "prompt": "close-up of his face, eyes squeezed shut, bracing himself, dust falling around him, dusk light",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "04a",
+   "scene": 4,
+   "hero": true,
+   "seed": 41,
+   "prompt": "close-up, looking down at a glowing smartphone in his hand, face lit by the screen, worried expression, dusk street",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "04b",
+   "scene": 4,
+   "hero": true,
+   "seed": 42,
+   "prompt": "turning his head to look back toward the sea at the end of the street, over-the-shoulder view, dusk, distant bay",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "05a",
+   "scene": 5,
+   "hero": true,
+   "seed": 51,
+   "prompt": "running away from the camera up a steep narrow residential street, seen from behind, backpack bouncing, utility poles, dusk",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "05b",
+   "scene": 5,
+   "hero": true,
+   "seed": 52,
+   "prompt": "running toward the camera up a hill road, out of breath, other people running behind him, dusk, motion blur",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "06a",
+   "scene": 6,
+   "hero": false,
+   "seed": 61,
+   "prompt": "wide view of an industrial port with cranes, a huge dark tsunami wave flooding over the seawall into the port, dusk, spray"
+  },
+  {
+   "id": "06b",
+   "scene": 6,
+   "hero": true,
+   "seed": 62,
+   "prompt": "standing on a hillside road looking back down at the sea, seen from behind, the port far below, dusk",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "06c",
+   "scene": 6,
+   "hero": false,
+   "seed": 63,
+   "prompt": "muddy tsunami water surging through empty port streets, cars and debris carried away, warehouses, dusk, no people"
+  },
+  {
+   "id": "07a",
+   "scene": 7,
+   "hero": true,
+   "seed": 71,
+   "prompt": "walking slowly along a pitch dark street at night, holding a smartphone flashlight in front of him, power outage, no street lights",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "07b",
+   "scene": 7,
+   "hero": false,
+   "seed": 72,
+   "prompt": "a dark Japanese city skyline at night with every light out, blackout, faint moonlight, silhouettes of buildings"
+  },
+  {
+   "id": "08a",
+   "scene": 8,
+   "hero": true,
+   "seed": 81,
+   "prompt": "standing still on a dark hill road at night, seen from behind, looking at a distant orange glow over the city",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "08b",
+   "scene": 8,
+   "hero": false,
+   "seed": 82,
+   "prompt": "distant fires and rising smoke over a dark city at night, orange glow reflected on clouds, long lens"
+  },
+  {
+   "id": "08c",
+   "scene": 8,
+   "hero": false,
+   "seed": 83,
+   "prompt": "fire glow and smoke behind dark houses at night, embers in the air, seen from a distance"
+  },
+  {
+   "id": "09a",
+   "scene": 9,
+   "hero": false,
+   "seed": 91,
+   "prompt": "inside a school gymnasium used as an evacuation shelter at night, people sitting on blankets, flashlights, emergency lights, quiet"
+  },
+  {
+   "id": "09b",
+   "scene": 9,
+   "hero": true,
+   "seed": 92,
+   "prompt": "sitting on a grey blanket on a gymnasium floor at night, tired, holding a bottle of water, dim flashlight light, evacuation shelter",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "09c",
+   "scene": 9,
+   "hero": false,
+   "seed": 93,
+   "prompt": "a battery lantern on a gymnasium floor, people resting under blankets in the background, dim warm light, night"
+  },
+  {
+   "id": "10a",
+   "scene": 10,
+   "hero": false,
+   "seed": 101,
+   "prompt": "dawn view from a hill over Shizuoka city and Suruga Bay, Mount Fuji in the distance, mist, soft pink light"
+  },
+  {
+   "id": "10b",
+   "scene": 10,
+   "hero": true,
+   "seed": 102,
+   "prompt": "standing on a grassy hilltop at dawn, seen from behind, looking down at the city and the bay, wind",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "10c",
+   "scene": 10,
+   "hero": true,
+   "seed": 103,
+   "prompt": "side profile on a hilltop at dawn, looking down at the city, soft morning light on his face, wind in his hair",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "11a",
+   "scene": 11,
+   "hero": true,
+   "seed": 111,
+   "prompt": "close-up side profile in warm morning light, looking into the distance, calm and serious, slight wind",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "11b",
+   "scene": 11,
+   "hero": false,
+   "seed": 112,
+   "prompt": "the city and the calm bay below in early morning light, seen from a hill, quiet, haze"
+  },
+  {
+   "id": "12a",
+   "scene": 12,
+   "hero": false,
+   "seed": 121,
+   "prompt": "Mount Fuji at dawn seen from Shizuoka, slow push in, clouds moving around the summit"
+  },
+  {
+   "id": "12b",
+   "scene": 12,
+   "hero": false,
+   "seed": 122,
+   "prompt": "Mount Fuji summit under dark heavy clouds, ominous, dim light, wind"
+  }
+ ]
 }

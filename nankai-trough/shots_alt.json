@@ -1,10 +1,69 @@
 {
-  "base_hero": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, a Japanese man in his 30s, short black hair, thin silver metal-frame glasses, navy business suit, white shirt, grey tie, black backpack",
-  "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Japan",
-  "negative": "",
-  "clips": [
-    {"id": "02b", "scene": 2, "hero": false, "seed": 2201, "prompt": "earthquake, debris and broken pieces falling from a building facade onto the sidewalk, cloud of dust, shattered glass, a fallen metal signboard on the pavement, dusk, street level"},
-    {"id": "06a", "scene": 6, "hero": false, "seed": 6101, "prompt": "huge dark wave crashing over a harbor breakwater, massive white spray, storm surge flooding the dock, cranes in the background, dusk, dramatic"},
-    {"id": "06c", "scene": 6, "hero": false, "seed": 6301, "prompt": "muddy flood water rushing through a street between warehouses, strong current, floating debris and a car swept away, dusk, no people"}
-  ]
+ "base_hero": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, a Japanese man in his 30s, short black hair, thin silver metal-frame glasses, navy business suit, white shirt, grey tie, black backpack",
+ "base_env": "RAW photo, cinematic film still, handheld camera, 35mm film grain, natural light, photorealistic, Japan",
+ "negative": "",
+ "clips": [
+  {
+   "id": "02b",
+   "scene": 2,
+   "hero": false,
+   "seed": 2201,
+   "prompt": "earthquake, debris and broken pieces falling from a building facade onto the sidewalk, cloud of dust, shattered glass, a fallen metal signboard on the pavement, dusk, street level"
+  },
+  {
+   "id": "06a",
+   "scene": 6,
+   "hero": false,
+   "seed": 6101,
+   "prompt": "huge dark wave crashing over a harbor breakwater, massive white spray, storm surge flooding the dock, cranes in the background, dusk, dramatic"
+  },
+  {
+   "id": "06c",
+   "scene": 6,
+   "hero": false,
+   "seed": 6301,
+   "prompt": "muddy flood water rushing through a street between warehouses, strong current, floating debris and a car swept away, dusk, no people"
+  },
+  {
+   "id": "07b",
+   "scene": 7,
+   "hero": false,
+   "seed": 7201,
+   "prompt": "total blackout at night, a Japanese residential district with every window dark and no street lights, black silhouettes of houses and power lines against a dim moonlit sky, very dark, low light"
+  },
+  {
+   "id": "09a",
+   "scene": 9,
+   "hero": false,
+   "seed": 9101,
+   "prompt": "evacuation shelter inside a school gymnasium at night, families sitting on blue tarps and grey blankets on the floor, cardboard partitions, dim emergency lighting, flashlights, quiet and tired"
+  },
+  {
+   "id": "10a",
+   "scene": 10,
+   "hero": false,
+   "seed": 10101,
+   "prompt": "wide dawn view from a hill over a coastal Japanese city and a calm bay, a single snow-capped Mount Fuji far in the distance, soft pink morning light, light mist over the city",
+   "w": 512,
+   "h": 640
+  },
+  {
+   "id": "12a",
+   "scene": 12,
+   "hero": false,
+   "seed": 12101,
+   "w": 512,
+   "h": 640,
+   "prompt": "Mount Fuji at dawn seen from Shizuoka, a single mountain, snow-capped summit glowing pink, clouds drifting past the summit, slow push in"
+  },
+  {
+   "id": "12b",
+   "scene": 12,
+   "hero": false,
+   "seed": 12201,
+   "w": 512,
+   "h": 640,
+   "prompt": "a single Mount Fuji under dark heavy storm clouds, ominous, dim light, wind blowing snow off the summit"
+  }
+ ]
 }
