@@ -18,11 +18,11 @@ NEG = ("nsfw, cleavage, revealing clothes, lowres, bad anatomy, bad hands, missi
        "text, error, cropped, worst quality, low quality, low score, bad score, average score, signature, watermark, "
        "username, blurry, retro artstyle, 1990s (style), 2000s (style), sketch")
 MEMBERS = {
-    "red":    ("red",        "adult woman, reddish brown hair, medium hair, side ponytail, large eyes, slightly tsurime, energetic, peace sign"),
+    "red":    ("red",        "adult woman, reddish brown hair, medium hair, side ponytail, large eyes, slightly tsurime, energetic smile, hand on hip, soft shading"),
     "blue":   ("navy blue",  "tall adult woman, very dark navy blue hair, long straight hair, narrow eyes, cool expression, mature"),
     "yellow": ("yellow",     "adult woman, blonde hair, short bob, hairpin, round eyes, big grin"),
     "green":  ("green",      "adult woman, very dark green hair, long wavy hair, tareme, gentle smile, mature, onee-san"),
-    "cyan":   ("light blue", "petite adult woman, baby face, light blue hair, twintails, large eyes, shy smile"),
+    "cyan":   ("light blue", "petite young adult woman, 19 years old, cute face, light blue hair, twintails, large eyes, shy smile, slender"),
     "pink":   ("pink",       "petite adult woman, baby face, pink hair, double bun, half updo, wink"),
     "purple": ("purple",     "adult woman, lavender silver hair, long hair, hair over one eye, mysterious smile, mature, elegant"),
 }
