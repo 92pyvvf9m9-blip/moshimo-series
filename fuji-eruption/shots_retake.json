@@ -1,0 +1,32 @@
+{
+ "base_hero": "RAW photo, cinematic film still, photorealistic, handheld camera, 35mm film grain, a Japanese salaryman in his mid 30s, short black hair, silver metal-frame glasses, dark navy blue suit, white shirt, dark tie, black backpack",
+ "base_env": "RAW photo, macro photography, photorealistic, 35mm film grain, natural light",
+ "negative": "",
+ "clips": [
+  {
+   "id": "f07",
+   "hero": false,
+   "seed": 7702,
+   "w": 512,
+   "h": 640,
+   "prompt": "close-up of a human hand held palm up with a thin layer of fine grey volcanic ash on the palm, fingers slightly curled, dark navy suit cuff, gloomy grey background, ash particles falling"
+  },
+  {
+   "id": "f07b",
+   "hero": false,
+   "seed": 7712,
+   "w": 512,
+   "h": 640,
+   "prompt": "an open palm facing up catching fine grey volcanic ash, close-up, the sleeve of a dark navy suit, overcast gloomy light, shallow depth of field"
+  },
+  {
+   "id": "f12",
+   "hero": true,
+   "ip": "none",
+   "seed": 1212,
+   "w": 512,
+   "h": 640,
+   "prompt": "a man in a dark navy blue suit jacket pressing a white handkerchief over his mouth and nose, walking toward the camera on an ash-covered sidewalk, grey ash falling, gloomy office district"
+  }
+ ]
+}

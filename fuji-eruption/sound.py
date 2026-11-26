@@ -131,7 +131,7 @@ def build(edit, outdir):
         fx.add(wet(shutter(1.6), S.IR_STREET, 0.3), st("f09") + 0.05, 0.55, 0.3)
     if has("f10"):
         fx.add(wet(fade(murmur(en("f10") - st("f09")), 0.4, 0.6), S.IR_FAR, 0.6), st("f09"), 0.12)
-    walk_a = st("f12")
+    walk_a = st("f12") if has("f12") else st("f15")
     walk_b = en("f15") if has("f15") else en("f12")
     fx.add(fade(ash_steps(walk_b - walk_a), 0.05, 0.3), walk_a, 0.45)
 

@@ -17,7 +17,7 @@ SRC = {
 }
 # [text, line, src_start, src_end, style, note]
 TELOPS = [
-    ["もしも今、", 0, 0.00, 1.00, "title"], ["{R}富士山{/}が", 0, 1.00, 1.75, "title"], ["噴火したら", 0, 1.75, 3.10, "title"],
+    ["もしも今、", 0, -0.42, 1.00, "title"], ["{R}富士山{/}が", 0, 1.00, 1.75, "title"], ["噴火したら", 0, 1.75, 3.10, "title"],
     ["想定は", 1, 3.30, 4.25, "normal", "src_wg"], ["{Y}1707年 宝永噴火{/}", 1, 4.25, 6.55, "normal", "src_wg"],
     ["と同じ規模", 1, 6.55, 7.90, "normal", "src_wg"],
     ["数時間後", 2, 8.25, 9.70, "normal"], ["新宿の空が", 2, 9.70, 11.10, "normal"], ["暗くなる", 2, 11.10, 12.30, "normal"],
@@ -37,35 +37,42 @@ TELOPS = [
 ]
 ASH = {"f05": 0.25, "f06": 0.45, "f07": 0.5, "f08": 0.45, "f09": 0.55, "f10": 0.6, "f11": 0.7, "f12": 0.8, "f13": 0.7,
        "f14": 0.75, "f15": 0.85, "f16": 0.5, "f17": 0.65, "f18": 0.5, "f19": 0.55, "f20": 0.2, "f21": 0.2, "f22": 0.15,
-       "f23": 0.35, "f24": 0.4, "f25": 0.25}
+       "f23": 0.35, "f24": 0.4, "f25": 0.1}
 
 FULL_CUTS = [
     ["f01", 0.00, 1.60, "erupt"], ["f02", 1.60, 3.20, "handheld_day"],
     ["f03", 3.20, 5.50, "erupt"], ["f04", 5.50, 7.70, "handheld_day"],
-    ["f05", 7.70, 10.10, "ash_light"], ["f06", 10.10, 12.20, "ash_light"], ["f07", 12.20, 13.60, "ash_light"],
-    ["f08", 13.60, 15.10, "ash_light"],
+    ["f05", 7.70, 10.10, "ash_light"], ["f06", 10.10, 12.20, "ash_light"], ["f08", 12.20, 15.10, "ash_light"],
     ["f09", 15.10, 16.70, "ash"], ["f10", 16.70, 18.30, "ash"],
     ["f11", 18.30, 20.30, "ash"], ["f13", 20.30, 22.40, "ash"], ["f14", 22.40, 24.00, "ash"],
-    ["f12", 24.00, 25.60, "ash_walk"], ["f15", 25.60, 27.00, "ash_walk"],
-    ["f16", 27.00, 29.40, "ash_night"], ["f17", 29.40, 32.00, "ash_night"], ["f18", 32.00, 34.90, "ash_night"],
+    ["f15", 24.00, 27.00, "ash_walk"],
+    ["f16", 27.00, 29.40, "ash_d4n"], ["f17", 29.40, 32.00, "ash_night"], ["f18", 32.00, 34.90, "ash_night"],
     ["f19", 34.90, 37.70, "ash_night"],
     ["f20", 37.70, 41.20, "ash_dawn"], ["f21", 41.20, 44.60, "ash_dawn"], ["f22", 44.60, 48.30, "ash_dawn"],
-    ["f23", 48.30, 51.30, "ash_dusk"], ["f24", 51.30, 54.90, "ash_dusk"], ["f25", 54.90, 57.30, "ash_dusk"],
+    ["f23", 48.30, 51.30, "ash_dusk"], ["f24", 51.30, 54.90, "ash_dusk"], ["f25", 54.90, 57.30, "handheld"],
     ["f26", 57.30, 60.00, "night_end"],
 ]
 FULL_PLACE = [0.40, 3.30, 7.95, 11.85, 15.20, 18.45, 22.70, 27.25, 31.75, 38.05, 43.75, 48.75, 51.55, 57.60]
 
-SHORT_SEQ = [("f01", 1.6), ("f02", 1.6), ("f05", 2.3), ("f06", 2.0), ("f07", 1.3), ("f08", 1.5), ("f11", 1.9),
-             ("f13", 2.1), ("f14", 1.6), ("f12", 1.6), ("f16", 2.4), ("f17", 2.6), ("f18", 2.9), ("f19", 2.8),
-             ("f20", 3.0), ("f21", 3.2), ("f23", 2.6), ("f24", 3.6), ("f25", 2.0), ("f26", 2.4)]
+SHORT_SEQ = [("f01", 1.6), ("f02", 1.6), ("f05", 2.3), ("f06", 2.0), ("f08", 2.8), ("f11", 1.9),
+             ("f13", 2.1), ("f14", 1.6), ("f15", 1.6, "end"), ("f16", 2.4), ("f17", 2.6), ("f18", 2.9), ("f19", 2.8),
+             ("f20", 3.0), ("f21", 3.2), ("f23", 2.6), ("f24", 3.6), ("f25", 2.0), ("f26", 2.4, "end")]
 SHORT_PLACE = {0: 0.40, 2: 3.40, 3: 7.25, 5: 10.55, 6: 14.75, 7: 17.80, 8: 22.20, 9: 28.40, 11: 34.60, 12: 37.30,
                13: 42.80}
 
 
+GROUND = {"f11": {"y0": 0.02, "y1": 0.30, "alpha": 0.86}, "f14": {"y0": 0.45, "y1": 0.70, "alpha": 0.7},
+          "f19": {"y0": 0.55, "y1": 0.80, "alpha": 0.55}}
+
+
+PICKS = {"f16": "f05", "f24": "f23"}
+REFRAME = {"f24": {"zoom": [1.42, 1.58], "cy": -0.04}}
+
+
 def base(total):
-    return {"fps": 30, "width": 1080, "height": 1920, "total": total,
+    return {"picks": PICKS, "reframe": REFRAME, "fps": 30, "width": 1080, "height": 1920, "total": total,
             "disclaimer": "※内閣府の想定に基づく再現（予言ではありません）",
-            "src_main": SRC["src_gl"], "src_notes": SRC, "ash": ASH}
+            "src_main": SRC["src_gl"], "src_notes": SRC, "ash": ASH, "ground_ash": GROUND}
 
 
 full = base(60.0)
@@ -81,16 +88,18 @@ json.dump(full, open("edit_60.json", "w", encoding="utf-8"), ensure_ascii=False,
 full_len = {c[0]: round(c[2] - c[1], 2) for c in FULL_CUTS}
 t = 0.0
 cuts = []
-for cid, d in SHORT_SEQ:
+for item in SHORT_SEQ:
+    cid, d = item[0], item[1]
     assert d <= full_len[cid] + 1e-6, (cid, d, full_len[cid])
     style = next(c[3] for c in FULL_CUTS if c[0] == cid)
-    cuts.append([cid, round(t, 2), round(t + d, 2), style, 0.0])
+    off = round(full_len[cid] - d, 3) if len(item) > 2 and item[2] == "end" else 0.0
+    cuts.append([cid, round(t, 2), round(t + d, 2), style, off])
     t += d
 assert abs(t - 45.0) < 1e-6, t
 short = base(45.0)
 short["cuts"] = cuts
 short["fade_in"] = {"f16": 0.6, "f20": 0.5}
-short["fade_out"] = {"f12": 0.4, "f26": 0.6}
+short["fade_out"] = {"f15": 0.4, "f26": 0.6}
 short["narration"] = {"file": "narration.mp3", "tempo": TEMPO,
                       "lines": [[LINES[i][0], LINES[i][1], p] for i, p in sorted(SHORT_PLACE.items())],
                       "all_lines": [[LINES[i][0], LINES[i][1], SHORT_PLACE.get(i, -100.0)] for i in range(len(LINES))]}

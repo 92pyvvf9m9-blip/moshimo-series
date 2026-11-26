@@ -65,7 +65,7 @@ def camera(style, n, seed):
     elif style == "erupt":
         dx, dy, rot = hand(5, 0.15, 0.2, 0.8)
         z = 1.04 + 0.07 * (0.5 - 0.5 * np.cos(np.pi * np.linspace(0, 1, n)))
-    elif style in ("handheld", "night", "night_d4n", "shelter", "handheld_day", "ash_light", "ash", "ash_night", "ash_dawn", "ash_dusk", "night_end"):
+    elif style in ("handheld", "night", "night_d4n", "shelter", "handheld_day", "ash_light", "ash", "ash_night", "ash_d4n", "ash_dawn", "ash_dusk", "night_end"):
         amp = {"handheld": 8, "night": 6, "night_d4n": 4, "shelter": 5}.get(style, 6)
         dx, dy, rot = hand(amp, 0.25)
         z = np.linspace(1.06, 1.085, n)
@@ -91,11 +91,12 @@ GRADES = {
     "ash_dawn":  ((1.02, 0.97, 0.92), (0.050, 0.046, 0.044), 0.40, 0.92, 0.92),
     "ash_dusk":  ((1.05, 0.95, 0.85), (0.030, 0.026, 0.026), 0.45, 1.00, 0.80),
     "night_end": ((0.85, 0.90, 1.05), (0.004, 0.006, 0.012), 0.40, 1.15, 0.62),
+    "ash_blue":  ((0.90, 0.96, 1.10), (0.020, 0.022, 0.030), 0.62, 1.00, 0.80),
 }
 STYLE_GRADE = {"quake": "dusk", "quake_peak": "dusk", "aftershake": "dusk", "run": "dusk", "handheld": "dusk",
                "night": "night", "night_d4n": "dayfornight",
-               "erupt": "day", "handheld_day": "day", "ash_light": "ash_light", "ash": "ash", "ash_walk": "ash",
-               "ash_night": "ash_night", "ash_dawn": "ash_dawn", "ash_dusk": "ash_dusk", "night_end": "night_end", "shelter": "shelter", "dawn": "dawn", "dawn_push": "dawn", "ominous": "ominous"}
+               "erupt": "day", "handheld_day": "day", "ash_light": "ash_light", "ash": "ash", "ash_walk": "ash_blue",
+               "ash_night": "ash_night", "ash_d4n": "dayfornight", "ash_dawn": "ash_dawn", "ash_dusk": "ash_dusk", "night_end": "night_end", "shelter": "shelter", "dawn": "dawn", "dawn_push": "dawn", "ominous": "ominous"}
 
 yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
 R2 = ((xx - W / 2) / (W / 2)) ** 2 * 0.8 + ((yy - H / 2) / (H / 2)) ** 2 * 0.6
@@ -216,38 +217,63 @@ def apply_sign(frame, t, fx, fps):
 
 # ---------- falling volcanic ash (screen-space particles, persistent within a cut) ----------
 class AshFall:
+    """Fine grey volcanic ash: many small particles (more far than near), diagonal drift, plus haze."""
     def __init__(self, n, density, night=False, seed=0):
         r = np.random.default_rng(seed + 991)
-        k = int(900 * density)
+        k = int(1500 * density)
         self.night = night
-        self.depth = r.uniform(0.15, 1.0, k)                    # 1 = near the camera
-        self.x = r.uniform(-60, W + 60, k)
+        self.density = density
+        self.depth = r.uniform(0.1, 1.0, k) ** 2                # most particles are far away
+        self.x = r.uniform(-80, W + 80, k)
         self.y = r.uniform(-H * 0.1, H, k)
-        self.vy = (40 + 210 * self.depth) * r.uniform(0.8, 1.2, k)
-        self.vx = r.uniform(8, 38, k) * self.depth
+        self.vy = (35 + 230 * self.depth) * r.uniform(0.8, 1.2, k)
+        self.vx = (12 + 40 * self.depth) * r.uniform(0.6, 1.2, k)
         self.ph = r.uniform(0, 6.28, k)
-        self.size = 0.8 + 4.2 * self.depth ** 1.6
-        self.alpha = (0.25 + 0.55 * self.depth) * r.uniform(0.6, 1.0, k)
+        self.size = 0.5 + 3.0 * self.depth ** 2
+        self.alpha = (0.18 + 0.5 * self.depth) * r.uniform(0.6, 1.0, k)
+        hz = 0.12 * density if night else 0.24 * density
+        rows = np.linspace(1.15, 0.85, H, dtype=np.float32)[:, None, None]
+        self.haze = (hz * rows).astype(np.float32)
+        self.haze_col = np.array([40, 42, 48] if night else [150, 146, 138], np.float32)
 
     def step(self, i):
         dt = 1 / FPS
         t = i * dt
         self.y += self.vy * dt
-        self.x += (self.vx + 14 * np.sin(1.3 * t + self.ph)) * dt
+        self.x += (self.vx + 10 * np.sin(1.3 * t + self.ph)) * dt
         wrap = self.y > H + 20
         self.y[wrap] -= H + 60
-        self.x[self.x > W + 60] -= W + 120
+        self.x[self.x > W + 80] -= W + 160
 
     def draw(self, fr):
         lay = Image.new("L", (W, H), 0)
         d = ImageDraw.Draw(lay)
         for x, y, s_, a_, vy in zip(self.x, self.y, self.size, self.alpha, self.vy):
-            streak = vy / FPS * 0.5
+            streak = vy / FPS * 0.7
             d.ellipse([x - s_, y - s_ - streak, x + s_, y + s_], fill=int(255 * a_))
-        m = np.asarray(lay.filter(ImageFilter.GaussianBlur(1.2)), np.float32)[..., None] / 255.0
-        col = np.array([70, 72, 78] if self.night else [212, 208, 198], np.float32)
-        out = fr.astype(np.float32) * (1 - m) + col * m
+        m = np.asarray(lay.filter(ImageFilter.GaussianBlur(1.0)), np.float32)[..., None] / 255.0
+        col = np.array([95, 98, 106] if self.night else [172, 168, 160], np.float32)
+        out = fr.astype(np.float32)
+        out = out * (1 - self.haze) + self.haze_col * self.haze
+        out = out * (1 - m) + col * m
         return out.clip(0, 255).astype(np.uint8)
+
+
+def make_ground_ash(sw, sh, cfg, seed):
+    """A layer of settled grey ash on the ground (source space): mottled colour + soft top edge."""
+    r = np.random.default_rng(seed + 4242)
+    def octave(div):
+        a_ = (r.random((sh // div + 1, sw // div + 1)) * 255).astype(np.uint8)
+        return np.asarray(Image.fromarray(a_).resize((sw, sh), Image.BICUBIC), np.float32) / 255.0
+    mott = 0.6 * octave(10) + 0.4 * octave(3)
+    grain = r.standard_normal((sh, sw)).astype(np.float32)
+    col = np.array([172, 168, 160], np.float32)[None, None, :] + (mott[..., None] - 0.5) * 16 + grain[..., None] * 7
+    yy_ = np.linspace(0, 1, sh, dtype=np.float32)[:, None]
+    y0, y1 = cfg["y0"], cfg["y1"]
+    ramp = np.clip((yy_ - y0) / max(1e-3, y1 - y0), 0, 1)
+    ramp = ramp * ramp * (3 - 2 * ramp)
+    alpha = (ramp * cfg.get("alpha", 0.8) * (0.85 + 0.3 * (mott - 0.5)))[..., None]
+    return col, np.clip(alpha, 0, 1)
 
 
 def process(cut, idx):
@@ -281,9 +307,11 @@ def process(cut, idx):
     if rf:
         z = z * np.linspace(rf["zoom"][0], rf["zoom"][1], n)
         scx, scy = sw * (0.5 + rf.get("cx", 0.0)), sh * (0.5 + rf.get("cy", 0.0))
+    gcfg = E.get("ground_ash", {}).get(cid)
+    g_col, g_alpha = make_ground_ash(sw, sh, gcfg, idx) if gcfg else (None, None)
     sfx_cfg = E.get("sign_fx")
     dens = E.get("ash", {}).get(cid, 0.0)
-    ash = AshFall(n, dens, night=style in ("ash_night", "night_end"), seed=idx) if dens > 0 else None
+    ash = AshFall(n, dens, night=style in ("ash_night", "night_end", "ash_d4n"), seed=idx) if dens > 0 else None
     if ash is not None:
         for _ in range(int(FPS * 2)):        # pre-roll so the ash is already falling on frame 0
             ash.step(0)
@@ -291,6 +319,8 @@ def process(cut, idx):
         fr_lo = lo[i]
         if sfx_cfg and cid == sfx_cfg["cut"]:
             fr_lo = apply_sign(fr_lo, i / FPS - sfx_cfg["t_start"], sfx_cfg, FPS)
+        if g_col is not None:
+            fr_lo = (fr_lo.astype(np.float32) * (1 - g_alpha) + g_col * g_alpha).clip(0, 255).astype(np.uint8)
         im = Image.fromarray(fr_lo)
         sc = base * z[i]
         th = math.radians(rot[i])
