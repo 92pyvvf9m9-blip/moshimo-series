@@ -17,14 +17,17 @@ FONT = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"
 
 
 def cutout(path):
+    """Remove a flat background: colour sampled from the corners, flood-filled from the image border."""
     im = Image.open(path).convert("RGB"); a = np.asarray(im).astype(np.int16)
-    bright = a.min(axis=2) > 225; flat = (a.max(axis=2) - a.min(axis=2)) < 28
-    lab, n = ndimage.label(bright & flat)
+    corners = np.concatenate([a[:12, :12].reshape(-1, 3), a[:12, -12:].reshape(-1, 3), a[-12:, :12].reshape(-1, 3), a[-12:, -12:].reshape(-1, 3)])
+    bgc = np.median(corners, axis=0)
+    near = np.abs(a - bgc).max(axis=2) < 26
+    lab, n = ndimage.label(near)
     edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
     bg = np.isin(lab, list(edge))
     alpha = (~bg).astype(np.uint8) * 255
     alpha = np.asarray(Image.fromarray(alpha).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(1.2)))
-    rgba = np.dstack([np.asarray(im), alpha]); out = Image.fromarray(rgba, "RGBA")
+    out = Image.fromarray(np.dstack([np.asarray(im), alpha]), "RGBA")
     ys, xs = np.where(alpha > 40)
     return out.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)) if len(xs) else out
 
