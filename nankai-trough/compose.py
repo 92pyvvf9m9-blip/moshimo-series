@@ -225,8 +225,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 # ---------------- final encode ----------------
 run(["ffmpeg", "-v", "error", "-y", "-i", video, "-i", wav,
      "-filter_complex", f"[0:v]ass={ass}:fontsdir=/usr/share/fonts/opentype/noto,format=yuv420p[v]",
-     "-map", "[v]", "-map", "1:a", "-c:v", "libx264", "-profile:v", "high", "-level", "4.2", "-preset", "slow",
-     "-crf", "21", "-maxrate", "9M", "-bufsize", "18M", "-r", str(FPS), "-g", str(FPS * 2),
+     "-map", "[v]", "-map", "1:a", "-c:v", "libx264", "-profile:v", "high", "-level", "4.0", "-preset", "slow",
+     "-crf", "21", "-maxrate", "6500k", "-bufsize", "13000k", "-r", str(FPS), "-g", str(FPS * 2),
      "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
      "-c:a", "aac", "-b:a", "256k", "-ar", str(SR), "-ac", "2", "-movflags", "+faststart",
      "-t", f"{TOTAL:.3f}", OUT])
