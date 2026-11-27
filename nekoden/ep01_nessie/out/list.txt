@@ -1,0 +1,7 @@
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p01.mp4'
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p02.mp4'
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p03.mp4'
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p04.mp4'
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p05.mp4'
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p06.mp4'
+file '/home/user/moshimo-series/nekoden/ep01_nessie/parts/p07.mp4'
